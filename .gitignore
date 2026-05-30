@@ -1,0 +1,16 @@
+# Virtual environment
+.venv/
+
+# Editor output
+project.json
+export/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# OS / editor cruft
+.DS_Store
+*.swp
