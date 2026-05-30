@@ -109,8 +109,8 @@ class Editor:
             self.buttons.append(Button((x, y, w, 26), label, cb))
             x += w + 8
 
-        # Right-column action buttons.
-        rx, ry = K.RIGHT_X, 300
+        # Right-column action buttons (below the INFO + PREVIEW panel).
+        rx, ry = K.RIGHT_X, 372
         racts = [
             ("Play / Pause", self.toggle_play), ("FPS -", lambda: self.change_fps(-1)),
             ("FPS +", lambda: self.change_fps(1)), ("Onion skin", self.toggle_onion),
