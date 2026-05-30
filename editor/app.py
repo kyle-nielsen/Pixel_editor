@@ -170,6 +170,18 @@ class Editor:
         s = self.project.sprite
         self.project.frame_index = (self.project.frame_index + step) % len(s.frames)
 
+    def scroll_frames(self, direction):
+        """Step through frames with the mouse wheel (-1 prev, +1 next).
+
+        Scrolling pauses playback so you land on a stable frame.
+        """
+        if direction == 0:
+            return
+        self.playing = False
+        self.next_frame(1 if direction > 0 else -1)
+        self.status = (f"Frame {self.project.frame_index + 1}"
+                       f"/{len(self.project.sprite.frames)}")
+
     def select_sprite(self, i):
         if 0 <= i < len(self.project.sprites):
             self.project.sprite_index = i
@@ -263,7 +275,7 @@ class Editor:
                 self.select_sprite(i)
                 return
         # Timeline thumbnails.
-        for i, rect in enumerate(self._thumb_rects()):
+        for i, rect in self._thumb_rects():
             if rect.collidepoint(pos):
                 self.project.frame_index = i
                 return
@@ -364,11 +376,26 @@ class Editor:
         return out
 
     def _thumb_rects(self):
+        """Visible timeline thumbnails as ``(frame_index, rect)``.
+
+        The strip is a single row clipped to the canvas width and scrolled to
+        keep the current frame in view, so it never runs under the right-hand
+        control column.
+        """
+        pitch = K.THUMB + 6
+        avail = K.CANVAS_W  # TIMELINE_X .. CANVAS_X + CANVAS_W
+        max_cols = max(1, int((avail + 6) / pitch))
+        n = len(self.project.sprite.frames)
+        if n <= max_cols:
+            start = 0
+        else:
+            start = min(max(0, self.project.frame_index - (max_cols - 1)),
+                        n - max_cols)
         out = []
         x = K.TIMELINE_X
-        for i in range(len(self.project.sprite.frames)):
-            out.append(pygame.Rect(x, K.TIMELINE_Y, K.THUMB, K.THUMB))
-            x += K.THUMB + 6
+        for i in range(start, min(start + max_cols, n)):
+            out.append((i, pygame.Rect(x, K.TIMELINE_Y, K.THUMB, K.THUMB)))
+            x += pitch
         return out
 
     # --------------------------------------------------------------- drawing
@@ -499,9 +526,11 @@ class Editor:
         pygame.draw.rect(self.screen, K.C_BORDER, pr, 1)
 
     def _draw_timeline(self):
-        self._text("FRAMES", (K.TIMELINE_X, K.TIMELINE_Y - 18),
+        header = (f"FRAMES  {self.project.frame_index + 1}"
+                  f"/{len(self.project.sprite.frames)}")
+        self._text(header, (K.TIMELINE_X, K.TIMELINE_Y - 18),
                    self.font_sm, K.C_TEXT_DIM)
-        for i, rect in enumerate(self._thumb_rects()):
+        for i, rect in self._thumb_rects():
             pygame.draw.rect(self.screen, K.C_PANEL, rect)
             frame = self.project.sprite.frames[i]
             sc = K.THUMB / K.GRID_W
@@ -550,6 +579,11 @@ class Editor:
                     self.handle_mouse_up()
                 elif e.type == pygame.MOUSEMOTION:
                     self.handle_drag(e.pos)
+                elif e.type == pygame.MOUSEWHEEL:
+                    if e.y > 0:
+                        self.scroll_frames(-1)  # wheel up -> previous frame
+                    elif e.y < 0:
+                        self.scroll_frames(1)   # wheel down -> next frame
                 elif e.type == pygame.KEYDOWN:
                     self.handle_key(e)
             self.update(dt)

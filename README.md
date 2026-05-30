@@ -13,6 +13,8 @@ each with its own animation frames and playback speed.
 - 32-colour palette + current-colour readout
 - **Animation**: multiple frames per sprite, add / duplicate / delete / clear,
   onion-skin overlay, and live playback at an adjustable FPS
+- Scrolling timeline (mouse wheel steps through frames; the strip auto-scrolls
+  to keep the current frame in view)
 - Multiple sprites (3 characters + props) via top tabs
 - Undo / redo
 - Save & load the whole project as JSON
@@ -34,13 +36,13 @@ pip install -r requirements.txt
 python main.py
 ```
 
-## Keyboard shortcuts
+## Keyboard & mouse
 
-| Action | Keys |
+| Action | Input |
 | --- | --- |
 | Pencil / Eraser / Fill / Picker | `P` / `E` / `F` / `I` |
 | New / Duplicate / Delete / Clear frame | `N` / `D` / `Del` / `C` |
-| Previous / Next frame | `,` / `.` |
+| Previous / Next frame | `,` / `.` or **mouse wheel** |
 | Select sprite tab | `1` – `4` |
 | Play / pause animation | `Space` |
 | Toggle grid / onion skin | `G` / `O` |
